@@ -1,5 +1,5 @@
 # escape=`
-FROM microsoft/windowsservercore
+FROM mcr.microsoft.com/windows/servercore:ltsc2016
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 

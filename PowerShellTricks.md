@@ -83,7 +83,7 @@ Expand-Archive -Path $zip -DestinationPath $dest -Force
 To calculate a SHA256 sum of a file use this
 
 ```powershell
-((Get-FileHash $filename -Algorithm sha256).Hash
+(Get-FileHash $filename -Algorithm sha256).Hash
 ```
 
 ## `printenv`
@@ -125,7 +125,7 @@ ls | measure
 To measure the time that a command takes, use
 
 ```powershell
-Measure-Command {docker run microsoft/nanoserver hostname}
+Measure-Command {docker run mcr.microsoft.com/windows/nanoserver:1809 hostname}
 ```
 
 ## time the stdout of another command
@@ -167,6 +167,15 @@ Surprise!
 PS C:\Users\vagrant> $(gp "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").BuildLabEx
 14393.447.amd64fre.rs1_release_inmarket.161102-0100
 PS C:\Users\vagrant> winver
+```
+
+## List processes with PID, PPID, commandline
+
+The simple `docker exec cid powershell -command get-process` does not list the parent PID and not the command line of all processes.
+Here is another command that works for me:
+
+```
+docker exec cid powershell -command 'Get-CimInstance Win32_Process | Ft ProcessId,ParentProcessId,CommandLine -autosize | out-string -width 300'
 ```
 
 ## Links

@@ -1,14 +1,17 @@
-FROM microsoft/nanoserver
+FROM mcr.microsoft.com/windows/servercore:ltsc2016 as download
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-ENV DOCKER_VERSION 17.07.0-ce
+ENV DOCKER_VERSION 18.09.3
 
-RUN Invoke-WebRequest $('https://download.docker.com/win/static/edge/x86_64/docker-{0}.zip' -f $env:DOCKER_VERSION) -OutFile 'docker.zip' -UseBasicParsing ; \
-    Expand-Archive docker.zip -DestinationPath C:\ ; \
-    $env:PATH = 'C:\docker;{0}' -f $env:PATH ; \
-    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\' -Name Path -Value $env:PATH ; \
-    Remove-Item -Path docker.zip ; \
-    Remove-Item -Path docker\dockerd.exe
+RUN Invoke-WebRequest 'http://constexpr.org/innoextract/files/innoextract-1.6-windows.zip' -OutFile 'innoextract.zip' -UseBasicParsing ; \
+    Expand-Archive innoextract.zip -DestinationPath C:\ ; \
+    Remove-Item -Path innoextract.zip
 
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 ; \
+    Invoke-WebRequest $('https://github.com/docker/toolbox/releases/download/v{0}/DockerToolbox-{0}.exe' -f $env:DOCKER_VERSION) -OutFile 'dockertoolbox.exe' -UseBasicParsing
+RUN /innoextract.exe dockertoolbox.exe
+
+FROM mcr.microsoft.com/windows/nanoserver:sac2016
+COPY --from=download /app/docker.exe /
 CMD [ "docker.exe" ]

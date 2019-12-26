@@ -1,4 +1,4 @@
-FROM microsoft/windowsservercore
+FROM mcr.microsoft.com/windows/servercore:ltsc2016
 
 ADD ./config /config
 

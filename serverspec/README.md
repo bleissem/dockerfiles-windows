@@ -1,5 +1,7 @@
 # Run Serverspec tests in a Windows container
 
+[![This image on DockerHub](https://img.shields.io/docker/pulls/stefanscherer/serverspec-windows.svg)](https://hub.docker.com/r/stefanscherer/serverspec-windows/)
+
 [Dockerfile](https://github.com/StefanScherer/dockerfiles-windows/blob/master/serverspec/Dockerfile)
 
 This is a Windows Docker image with [Serverspec](http://serverspec.org) installed.
@@ -27,7 +29,7 @@ Chocolatey
     exit_status
       should eq 0
     stdout
-      should match /Chocolatey v0.10.3/
+      should match /Chocolatey v0.10.8/
 
 Ruby
   Command "ruby --version"
@@ -39,7 +41,7 @@ Ruby
     exit_status
       should eq 0
     stdout
-      should match /Bundler version 1.14.3/
+      should match /Bundler version 1.16.0/
 
 Finished in 10.25 seconds (files took 1.77 seconds to load)
 7 examples, 0 failures

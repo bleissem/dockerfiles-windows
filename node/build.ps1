@@ -1,30 +1,40 @@
 function buildVersion($majorMinorPatch, $majorMinor, $major) {
-  docker build --pull -t node:$majorMinorPatch $majorMinor
-  docker tag node:$majorMinorPatch node:latest
-  docker tag node:$majorMinorPatch node:$majorMinor
-  docker tag node:$majorMinorPatch node:$major
-  docker tag node:$majorMinorPatch node:$majorMinorPatch-windowsservercore
+  docker build -t node:$majorMinorPatch-windowsservercore $major
 
-  if (Test-Path $majorMinor\build-tools) {
-    docker build -t node:$majorMinorPatch-build-tools $majorMinor/build-tools
-    docker tag node:$majorMinorPatch-build-tools node:$majorMinor-build-tools
-    docker tag node:$majorMinorPatch-build-tools node:$major-build-tools
+  if (Test-Path $major\build-tools) {
+    docker build -t node:$majorMinorPatch-build-tools $major/build-tools
   }
 
-  docker build -t node:$majorMinorPatch-onbuild $majorMinor/onbuild
-  docker tag node:$majorMinorPatch-onbuild node:$majorMinor-onbuild
-  docker tag node:$majorMinorPatch-onbuild node:$major-onbuild
+  if (Test-Path $major\pure) {
+    docker build -t node:$majorMinorPatch-pure $major/pure
+  }
 
-  docker build --pull -t node:$majorMinorPatch-nano $majorMinor/nano
-  docker tag node:$majorMinorPatch-nano node:latest-nano
-  docker tag node:$majorMinorPatch-nano node:$majorMinor-nano
-  docker tag node:$majorMinorPatch-nano node:$major-nano
-  docker tag node:$majorMinorPatch-nano node:$majorMinorPatch-nanoserver
-
-  docker build -t node:$majorMinorPatch-nano-onbuild $majorMinor/nano/onbuild
-  docker tag node:$majorMinorPatch-nano-onbuild node:$majorMinor-nano-onbuild
-  docker tag node:$majorMinorPatch-nano-onbuild node:$major-nano-onbuild
+  docker build -t node:$majorMinorPatch-nanoserver $major/nano
 }
 
-buildVersion "6.11.4" "6.11" "6"
-buildVersion "8.7.0" "8.7" "8"
+Write-Output "Build with server docker engine"
+# $ErrorActionPreference = 'Continue'
+$docker_version = "18-09-6"
+wget -outfile $env:TEMP\docker.zip $("https://dockermsft.blob.core.windows.net/dockercontainer/docker-{0}.zip" -f $docker_version)
+Expand-Archive -Path $env:TEMP\docker.zip -DestinationPath $env:TEMP -Force
+copy $env:TEMP\docker\*.* $env:ProgramFiles\docker
+Remove-Item $env:TEMP\docker.zip
+# $ErrorActionPreference = 'Stop'
+$env:PATH="c:\program files\docker;$env:PATH"
+Write-Output "Stop docker"
+Stop-Service docker
+Write-Output "Stop com.docker.service"
+Stop-Service com.docker.service
+Write-Output "Unregister docker"
+dockerd --unregister-service
+Write-Output "Register docker"
+dockerd --register-service
+Write-Output "Start docker"
+Start-Service docker
+Write-Output "Running server docker engine"
+docker version
+
+#buildVersion "6.14.4" "6.14" "6"
+#buildVersion "8.11.4" "8.11" "8"
+
+buildVersion "10.16.3" "10.16" "10"

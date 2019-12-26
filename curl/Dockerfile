@@ -1,12 +1,10 @@
-FROM microsoft/nanoserver
+FROM mcr.microsoft.com/windows/servercore:ltsc2016 AS download
+ENV CURL_VERSION 7.64.1
+WORKDIR /curl
+ADD https://skanthak.homepage.t-online.de/download/curl-$CURL_VERSION.cab curl.cab
+RUN expand /R curl.cab /F:* .
 
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-
-ENV CURL_VERSION 7.55.1
-
-RUN Invoke-WebRequest $('https://dl.uxnr.de/build/curl/curl_winssl_msys2_mingw64_stc/curl-{0}/curl-{0}.zip' -f $env:CURL_VERSION) -OutFile 'curl.zip' -UseBasicParsing ; \
-    Expand-Archive curl.zip -DestinationPath C:\ ; \
-    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' -Name ServerPriorityTimeLimit -Value 0 -Type DWord ; \
-    Remove-Item -Path curl.zip
-
-ENTRYPOINT [ "C:\\src\\curl.exe" ]
+FROM mcr.microsoft.com/windows/servercore:ltsc2016
+COPY --from=download /curl/AMD64/ /
+COPY --from=download /curl/CURL.LIC /
+ENTRYPOINT ["curl.exe"]
