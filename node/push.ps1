@@ -20,26 +20,36 @@ function pushVersion($majorMinorPatch, $majorMinor, $major) {
 
     rebase-docker-image `
       stefanscherer/node-windows:$majorMinorPatch-pure-1809 `
-      -s mcr.microsoft.com/windows/nanoserver:1809 `
+      -s stefanscherer/nanoserver:1809 `
       -t stefanscherer/node-windows:$majorMinorPatch-pure-1803 `
-      -b mcr.microsoft.com/windows/nanoserver:1803
+      -b stefanscherer/nanoserver:1803
     rebase-docker-image `
       stefanscherer/node-windows:$majorMinorPatch-pure-1809 `
-      -s mcr.microsoft.com/windows/nanoserver:1809 `
+      -s stefanscherer/nanoserver:1809 `
       -t stefanscherer/node-windows:$majorMinorPatch-pure-1903 `
-      -b mcr.microsoft.com/windows/nanoserver:1903
+      -b stefanscherer/nanoserver:1903
+    rebase-docker-image `
+      stefanscherer/node-windows:$majorMinorPatch-pure-1809 `
+      -s stefanscherer/nanoserver:1809 `
+      -t stefanscherer/node-windows:$majorMinorPatch-pure-1909 `
+      -b stefanscherer/nanoserver:1909
   }
 
   rebase-docker-image `
     stefanscherer/node-windows:$majorMinorPatch-nanoserver-1809 `
-    -s mcr.microsoft.com/windows/nanoserver:1809 `
+    -s stefanscherer/nanoserver:1809 `
     -t stefanscherer/node-windows:$majorMinorPatch-nanoserver-1803 `
-    -b mcr.microsoft.com/windows/nanoserver:1803
+    -b stefanscherer/nanoserver:1803
   rebase-docker-image `
     stefanscherer/node-windows:$majorMinorPatch-nanoserver-1809 `
-    -s mcr.microsoft.com/windows/nanoserver:1809 `
+    -s stefanscherer/nanoserver:1809 `
     -t stefanscherer/node-windows:$majorMinorPatch-nanoserver-1903 `
-    -b mcr.microsoft.com/windows/nanoserver:1903
+    -b stefanscherer/nanoserver:1903
+  rebase-docker-image `
+    stefanscherer/node-windows:$majorMinorPatch-nanoserver-1809 `
+    -s stefanscherer/nanoserver:1809 `
+    -t stefanscherer/node-windows:$majorMinorPatch-nanoserver-1909 `
+    -b stefanscherer/nanoserver:1909
 
   $nanoManifest = @"
 image: stefanscherer/node-windows:{0}
@@ -57,6 +67,11 @@ manifests:
       os: windows
   -
     image: stefanscherer/node-windows:{0}-nanoserver-1903
+    platform:
+      architecture: amd64
+      os: windows
+  -
+    image: stefanscherer/node-windows:{0}-nanoserver-1909
     platform:
       architecture: amd64
       os: windows
@@ -85,6 +100,11 @@ manifests:
     platform:
       architecture: amd64
       os: windows
+  -
+    image: stefanscherer/node-windows:{0}-pure-1909
+    platform:
+      architecture: amd64
+      os: windows
 "@
 
   $pureManifest -f $majorMinorPatch, $majorMinor, $major | Out-File pure.yml -Encoding Ascii
@@ -92,10 +112,12 @@ manifests:
   manifest-tool push from-spec pure.yml
 }
 
+$ErrorActionPreference = 'SilentlyContinue';
 npm install -g rebase-docker-image
+$ErrorActionPreference = 'Stop';
 choco install -y manifest-tool
 
 #pushVersion "6.14.4" "6.14" "6"
 #pushVersion "8.11.4" "8.11" "8"
-
-pushVersion "10.16.3" "10.16" "10"
+#pushVersion "10.19.0" "10.19" "10"
+pushVersion "12.16.1" "12.16" "12"
